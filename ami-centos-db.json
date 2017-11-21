@@ -1,0 +1,141 @@
+{
+    "variables": {
+        "aws_region": "us-east-1", 
+        "local_user": "{{ env `USER` }}", 
+        "source_ami": "", 
+        "git_sha": null, 
+        "root_passwd": "", 
+        "subnet_id": "subnet-449b791f", 
+        "distro_version": "7.4", 
+        "instance_type": "c4.large", 
+        "distro": "centos",
+        "hostname": null
+    }, 
+    "builders": [
+        {
+            "tags": {
+                "git_sha": "{{ user `git_sha` }}", 
+                "source_ami": "{{ user `source_ami` }}", 
+                "creator": "{{ user `local_user` }}", 
+                "timestamp": "{{ timestamp }}", 
+                "isotime": "{{ isotime }}", 
+                "packer_builder": "{{ build_name }}", 
+                "version": "{{ user `distro_version` }}", 
+                "source_region": "{{ user `aws_region` }}", 
+                "distro": "{{ user `distro` }}"
+            }, 
+            "ssh_username": "centos", 
+            "ami_virtualization_type": "hvm", 
+            "run_tags": {
+                "creator": "{{ user `local_user` }}", 
+                "delete_me": "yep"
+            }, 
+            "launch_block_device_mappings": [
+                {
+                    "volume_size": 100, 
+                    "delete_on_termination": true, 
+                    "volume_type": "gp2", 
+                    "device_name": "/dev/xvda"
+                },
+                {
+                    "volume_size": 300, 
+                    "delete_on_termination": false,
+                    "volume_type": "gp2",
+                    "device_name": "/dev/xvdb"
+                }
+            ],
+            "ami_block_device_mappings": [
+                {
+                    "volume_size": 100, 
+                    "delete_on_termination": true, 
+                    "volume_type": "gp2", 
+                    "device_name": "/dev/xvda"
+                },
+                {
+                    "volume_size": 300, 
+                    "delete_on_termination": false,
+                    "volume_type": "gp2",
+                    "device_name": "/dev/xvdb"
+                }
+            ],
+            "source_ami": "{{ user `source_ami` }}", 
+            "name": "ami-centos-db", 
+            "subnet_id": "{{ user `subnet_id` }}", 
+            "region": "{{ user `aws_region` }}", 
+            "ami_name": "{{ user `distro` }} {{ user `distro_version` }} {{ user `git_sha` }}/{{ timestamp }} - centos-db", 
+            "ami_users": [
+                "966157216157"
+            ], 
+            "instance_type": "{{ user `instance_type` }}", 
+            "ssh_timeout": "10m", 
+            "associate_public_ip_address": true, 
+            "type": "amazon-ebs", 
+            "ssh_pty": true,
+            "tags": {
+                "EnvironmentType": "dev", 
+                "Environment": "Development/US1",
+                "Role": "Database"
+                },
+            "run_tags": {
+                "EnvironmentType": "dev", 
+                "Environment": "Development/US1",
+                "Role": "Database"
+                }
+
+
+        }
+    ], 
+    "provisioners": [
+        {
+            "type": "shell-local", 
+            "command": "rm -rf puppet_infrastructure && git clone --depth 1 --single-branch --branch centos7 git@github.com:pwnieexpress/puppet_infrastructure.git"
+        },
+        {
+            "type": "shell-local", 
+            "command": "cd puppet_infrastructure && git archive --prefix=/etc/unity/ -o ../work/puppet_infrastructure.tar.gz HEAD "
+        },
+        {
+            "type": "shell-local", 
+            "command": "/usr/bin/s3cmd --no-progress -pq sync --no-check-md5 s3://pwnie-dev-config/eyaml work/ && tar cf work/dev-eyaml-keys.tar --transform='flags=r;s|^work/eyaml|etc/puppet/keys|' work/eyaml"
+        },
+        {
+            "source": "./work/dev-eyaml-keys.tar",
+            "destination": "dev-eyaml-keys.tar",
+            "type": "file"
+        },
+        {
+            "source": "./work/puppet_infrastructure.tar.gz",
+            "destination": "puppet_infrastructure.tar.gz",
+            "type": "file"
+        },
+        {
+            "inline": [
+                "sudo /etc/facter/facts.d/ec2_custom_facts.sh",
+                "sudo tar xf dev-eyaml-keys.tar -C /",
+                "sudo tar xzf puppet_infrastructure.tar.gz -C /",
+                "sudo rm dev-eyaml-keys.tar",
+                "sudo rm puppet_infrastructure.tar.gz"
+            ], 
+            "type": "shell"
+        },
+        {
+            "type": "shell", 
+            "execute_command": "chmod +x {{ .Path }}; {{ .Vars }} sudo -E {{ .Path }} && rm -f {{ .Path }}", 
+            "scripts": [
+                "scripts/034-postgresql.sh"
+            ]
+        },
+        {
+            "type": "puppet-masterless",
+              "execute_command": "cd {{.WorkingDir}} && {{if ne .FacterVars \"\"}}{{.FacterVars}} {{end}} {{if .Sudo}}sudo -E {{end}} {{if ne .PuppetBinDir \"\"}}{{.PuppetBinDir}}/{{end}}puppet apply --verbose --modulepath='{{.ModulePath}}' {{if ne .HieraConfigPath \"\"}}--hiera_config='{{.HieraConfigPath}}' {{end}} {{if ne .ManifestDir \"\"}}--manifestdir='{{.ManifestDir}}' {{end}} --detailed-exitcodes {{if ne .ExtraArguments \"\"}}{{.ExtraArguments}} {{end}} {{.ManifestFile}} || true",
+              "puppet_bin_dir": "/opt/puppetlabs/bin",
+              "hiera_config_path": "puppet_infrastructure/hiera.yaml",
+              "manifest_file": "puppet_infrastructure/manifests/site.pp",
+              "module_paths": [
+                "puppet_infrastructure/modules"
+              ]
+        }
+
+    ]
+}
+

@@ -1,0 +1,116 @@
+{
+    "variables": {
+        "aws_region": "us-east-1", 
+        "local_user": "{{ env `USER` }}", 
+        "source_ami": "", 
+        "git_sha": null, 
+        "root_passwd": "", 
+        "subnet_id": "subnet-449b791f", 
+        "distro_version": "7.4", 
+        "instance_type": "c4.large", 
+        "distro": "centos"
+    }, 
+    "builders": [
+        {
+            "tags": {
+                "git_sha": "{{ user `git_sha` }}", 
+                "source_ami": "{{ user `source_ami` }}", 
+                "creator": "{{ user `local_user` }}", 
+                "timestamp": "{{ timestamp }}", 
+                "isotime": "{{ isotime }}", 
+                "packer_builder": "{{ build_name }}", 
+                "version": "{{ user `distro_version` }}", 
+                "source_region": "{{ user `aws_region` }}", 
+                "distro": "{{ user `distro` }}"
+            }, 
+            "ssh_username": "centos", 
+            "ami_virtualization_type": "hvm", 
+            "run_tags": {
+                "creator": "{{ user `local_user` }}", 
+                "delete_me": "yep"
+            }, 
+            "launch_block_device_mappings": [
+                {
+                    "volume_size": 100, 
+                    "delete_on_termination": true, 
+                    "volume_type": "gp2", 
+                    "device_name": "/dev/sda1"
+                }
+            ], 
+            "ami_block_device_mappings": [
+                {
+                    "volume_size": 100, 
+                    "delete_on_termination": true, 
+                    "volume_type": "gp2", 
+                    "device_name": "/dev/sda1"
+                }
+            ], 
+            "source_ami": "{{ user `source_ami` }}", 
+            "name": "ami-centos-base", 
+            "subnet_id": "{{ user `subnet_id` }}", 
+            "region": "{{ user `aws_region` }}", 
+            "ami_name": "{{ user `distro` }} {{ user `distro_version` }} {{ user `git_sha` }}/{{ timestamp }} - centos-base", 
+            "ami_users": [
+                "966157216157"
+            ], 
+            "instance_type": "{{ user `instance_type` }}", 
+            "ssh_timeout": "10m", 
+            "associate_public_ip_address": true, 
+            "type": "amazon-ebs", 
+            "ssh_pty": true
+        }
+    ], 
+    "provisioners": [
+        {
+            "type": "shell-local", 
+            "command": "rm -f {{ template_dir }}/work/skel-{{ build_name }}.tgz\n"
+        },
+        {
+            "type": "shell-local", 
+            "command": "cd {{ template_dir }}/skel/ ; find . -type f | tar -cz -f {{ template_dir }}/work/skel-{{ build_name }}.tgz -T -\n"
+        }, 
+        {
+            "source": "{{ template_dir }}/work/skel-{{ build_name }}.tgz", 
+            "destination": "/tmp/packer-skel.tgz", 
+            "type": "file"
+        }, 
+        {
+            "type": "shell", 
+            "execute_command": "chmod +x {{ .Path }}; {{ .Vars }} sudo -E {{ .Path }} && rm -f {{ .Path }}", 
+            "scripts": [
+                "scripts/000-dump_env.sh", 
+                "scripts/006-import-gpg-keys.sh"
+            ]
+        }, 
+        {
+            "type": "shell", 
+            "execute_command": "chmod +x {{ .Path }}; {{ .Vars }} sudo -E {{ .Path }} && rm -f {{ .Path }}", 
+            "scripts": [
+                "scripts/025-update.sh", 
+                "scripts/025-cloud-init.sh"
+            ]
+        }, 
+        {
+            "type": "shell", 
+            "execute_command": "chmod +x {{ .Path }}; {{ .Vars }} sudo -E {{ .Path }} && rm -f {{ .Path }}", 
+            "scripts": [
+                "scripts/032-docker-host.sh", 
+                "scripts/028-devtools.sh",
+                "scripts/029-puppet.sh"
+            ]
+        }, 
+        {
+            "type": "shell", 
+            "execute_command": "chmod +x {{ .Path }}; {{ .Vars }} sudo -E {{ .Path }} && rm -f {{ .Path }}", 
+            "scripts": [
+                "scripts/997-cleanup.sh", 
+                "scripts/998-zerodisk.sh", 
+                "scripts/999-lockdown.sh"
+            ]
+        }, 
+        {
+            "inline": "rm -f /tmp/packer-skel.tgz", 
+            "type": "shell"
+        }
+    ]
+}
