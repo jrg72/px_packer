@@ -22,7 +22,11 @@
                 "packer_builder": "{{ build_name }}", 
                 "version": "{{ user `distro_version` }}", 
                 "source_region": "{{ user `aws_region` }}", 
-                "distro": "{{ user `distro` }}"
+                "distro": "{{ user `distro` }}",
+                "EnvironmentType": "dev", 
+                "Environment": "Development/US1",
+                "Role": "Database",
+                "Name": "centos-db"
             }, 
             "ssh_username": "centos", 
             "ami_virtualization_type": "hvm", 
@@ -71,11 +75,6 @@
             "associate_public_ip_address": true, 
             "type": "amazon-ebs", 
             "ssh_pty": true,
-            "tags": {
-                "EnvironmentType": "dev", 
-                "Environment": "Development/US1",
-                "Role": "Database"
-                },
             "run_tags": {
                 "EnvironmentType": "dev", 
                 "Environment": "Development/US1",
@@ -109,7 +108,7 @@
         },
         {
             "source": "./work/root-credentials",
-            "destination": "/root/.aws/credentials",
+            "destination": "root-credentials",
             "type": "file"
         },
         {
@@ -122,6 +121,7 @@
                 "sudo /etc/facter/facts.d/ec2_custom_facts.sh",
                 "sudo tar xf dev-eyaml-keys.tar -C /",
                 "sudo tar xzf puppet_infrastructure.tar.gz -C /",
+                "sudo mv root-credentials /root/.aws/credentials",
                 "sudo rm dev-eyaml-keys.tar",
                 "sudo rm puppet_infrastructure.tar.gz"
             ], 

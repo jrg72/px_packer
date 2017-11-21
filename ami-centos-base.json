@@ -21,7 +21,8 @@
                 "packer_builder": "{{ build_name }}", 
                 "version": "{{ user `distro_version` }}", 
                 "source_region": "{{ user `aws_region` }}", 
-                "distro": "{{ user `distro` }}"
+                "distro": "{{ user `distro` }}",
+                "Name": "centos-base"
             }, 
             "ssh_username": "centos", 
             "ami_virtualization_type": "hvm", 
