@@ -25,4 +25,7 @@ mount -a
 
 yum -y groupinstall "PostgreSQL Database Server 10 PGDG"
 
+/usr/pgsql-10/bin/postgresql-10-setup initdb
+
+systemctl enable postgresql-10
 
