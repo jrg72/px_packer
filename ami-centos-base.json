@@ -34,7 +34,7 @@
                     "volume_size": 100, 
                     "delete_on_termination": true, 
                     "volume_type": "gp2", 
-                    "device_name": "/dev/sda1"
+                    "device_name": "/dev/xvda"
                 }
             ], 
             "ami_block_device_mappings": [
@@ -42,7 +42,7 @@
                     "volume_size": 100, 
                     "delete_on_termination": true, 
                     "volume_type": "gp2", 
-                    "device_name": "/dev/sda1"
+                    "device_name": "/dev/xvda"
                 }
             ], 
             "source_ami": "{{ user `source_ami` }}", 
