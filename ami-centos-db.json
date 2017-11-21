@@ -108,7 +108,7 @@
             "type": "file"
         },
         {
-            "source": ".work/root-credentials",
+            "source": "./work/root-credentials",
             "destination": "/root/.aws/credentials",
             "type": "file"
         },
