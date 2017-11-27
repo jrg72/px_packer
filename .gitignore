@@ -7,5 +7,4 @@ packer*.json
 skel/*.tgz
 work/
 vendor/
-puppet_infrastructure
 .*.swp

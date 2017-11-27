@@ -39,11 +39,11 @@
                     "volume_size": 100, 
                     "delete_on_termination": true, 
                     "volume_type": "gp2", 
-                    "device_name": "/dev/xvda"
+                    "device_name": "/dev/sda1"
                 },
                 {
                     "volume_size": 300, 
-                    "delete_on_termination": false,
+                    "delete_on_termination": true,
                     "volume_type": "gp2",
                     "device_name": "/dev/xvdb"
                 }
@@ -53,11 +53,11 @@
                     "volume_size": 100, 
                     "delete_on_termination": true, 
                     "volume_type": "gp2", 
-                    "device_name": "/dev/xvda"
+                    "device_name": "/dev/sda1"
                 },
                 {
                     "volume_size": 300, 
-                    "delete_on_termination": false,
+                    "delete_on_termination": true,
                     "volume_type": "gp2",
                     "device_name": "/dev/xvdb"
                 }
@@ -118,10 +118,10 @@
         },
         {
             "inline": [
-                "sudo /etc/facter/facts.d/ec2_custom_facts.sh",
                 "sudo tar xf dev-eyaml-keys.tar -C /",
                 "sudo tar xzf puppet_infrastructure.tar.gz -C /",
                 "sudo mv root-credentials /root/.aws/credentials",
+                "sudo /etc/facter/facts.d/ec2_custom_facts.sh",
                 "sudo rm dev-eyaml-keys.tar",
                 "sudo rm puppet_infrastructure.tar.gz"
             ], 

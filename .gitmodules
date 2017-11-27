@@ -1,0 +1,4 @@
+[submodule "puppet_infrastructure"]
+	path = puppet_infrastructure
+	url = git@github.com:pwnieexpress/puppet_infrastructure.git
+	branch = centos7
