@@ -95,7 +95,6 @@
             "type": "shell", 
             "execute_command": "chmod +x {{ .Path }}; {{ .Vars }} sudo -E {{ .Path }} && rm -f {{ .Path }}", 
             "scripts": [
-                "scripts/032-docker-host.sh", 
                 "scripts/028-devtools.sh",
                 "scripts/029-puppet.sh"
             ]

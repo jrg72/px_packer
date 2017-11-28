@@ -7,6 +7,9 @@ exec 0<&- # close stdin
 
 set -e -u -o pipefail
 
+export DOCKER_VERSION=17.03.1.ce-1
+
+
 ## unpack skel for this module
 tar -xz \
     --preserve-permissions \
@@ -24,6 +27,6 @@ yum-config-manager \
       --add-repo \
           https://download.docker.com/linux/centos/docker-ce.repo
 
-yum install -y docker-ce
+yum install -y docker-ce-${DOCKER_VERSION}
 
-#systemctl enable docker.service
+systemctl enable docker.service
