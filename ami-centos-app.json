@@ -30,6 +30,7 @@
             }, 
             "ssh_username": "centos", 
             "ami_virtualization_type": "hvm", 
+            "iam_instance_profile": "ProductionDockerRegistryReader",
             "run_tags": {
                 "creator": "{{ user `local_user` }}", 
                 "delete_me": "yep"
