@@ -11,5 +11,5 @@ yum -y install ruby
 yum install -y python-pip
 yum install -y zlib-devel
 yum groupinstall -y "Development Tools"
-yum install -y python-devel
+yum install -y python-devel vim-enhanced
 pip install jq
